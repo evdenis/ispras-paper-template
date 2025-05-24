@@ -1,0 +1,58 @@
+name: Build Paper
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'paper.md'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'paper.md'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install pandoc
+      uses: pandoc/actions/setup@v1
+
+    - name: Cache node_modules
+      id: cache-deps
+      uses: actions/cache@v4
+      with:
+        path: proceedings-md/node_modules
+        key: ${{ runner.os }}-deps-${{ hashFiles('proceedings-md/package-lock.json') }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+
+    - name: Install npm dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        cd proceedings-md
+        npm install
+
+    - name: Build paper.docx
+      env:
+        PROCEEDINGS_MD: ./proceedings-md/src/main.js
+      run: make build
+
+    - name: Upload paper.docx as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: paper
+        path: paper.docx
+        retention-days: 7
+
