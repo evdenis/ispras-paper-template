@@ -15,7 +15,7 @@ ispras_templates:
         Denis Valentinovich EFREMOV – senior researcher. Research interests:
         formal verification, static and dynamic analysis.
 
-    - name_ru: 'A.K. Петренко'
+    - name_ru: 'А.К. Петренко'
       name_en: 'A.K. Petrenko'
       orcid: '0000-0001-7411-3831'
       email: '<petrenko@ispras.ru>'
@@ -69,8 +69,8 @@ ispras_templates:
   keywords_ru: 'защита информации, операционные системы, безопасность приложений, защита памяти, контроль целостности, изоляция, усиление защищенности'
   keywords_en: 'information security, operating systems, application security, memory protection, integrity control, isolation, security hardening, hardening'
 
-  for_citation_ru: 'Ефремов Д.В., Петренко А.К., Б.А. Позин, В.А. Семенов Обзор механизмов усиления защищенности операционных систем и пользовательских приложений'
-  for_citation_en: 'Efremov D.V., Petrenko A.K., B.A. Pozin, V.A. Semenov Overview of Hardening Mechanisms in Operating Systems and User Applications'
+  for_citation_ru: 'Ефремов Д.В., Петренко А.К. Обзор механизмов усиления защищенности операционных систем и пользовательских приложений'
+  for_citation_en: 'Efremov D.V., Petrenko A.K. Overview of Hardening Mechanisms in Operating Systems and User Applications'
   
   # page_header_* matches for_citation_* in template. It's still possible
   # to set these values to something different. @use_citation is a special
