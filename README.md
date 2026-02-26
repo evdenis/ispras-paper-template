@@ -1,6 +1,9 @@
 # ISPRAS Proceedings Paper Template
 
-This repository contains research on various paper protections in OS and userspace applications for the ISPRAS Proceedings.
+[![Build Paper](https://github.com/evdenis/ispras-paper-template/actions/workflows/paper.yml/badge.svg)](https://github.com/evdenis/ispras-paper-template/actions/workflows/paper.yml)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+
+This repository is a template for writing ISPRAS Proceedings papers in Markdown with automatic conversion to DOCX.
 
 ## Overview
 
@@ -15,6 +18,7 @@ To build the paper locally, you need:
 - Node.js
 - Pandoc
 - Git
+- hunspell with `en_US` and `ru_RU` dictionaries (`sudo apt install hunspell hunspell-en-us hunspell-ru`)
 
 ### Setup
 
@@ -33,14 +37,24 @@ To build the paper locally, you need:
 
 ### Available Make Targets
 
-The following make targets are available:
-
-- `make build`: Builds the paper.docx file from paper.md
-- `make open`: Builds and opens the paper.docx file (requires xdg-open)
+| Target | Description |
+|---|---|
+| `make build` | Build `paper.docx` from `paper.md` |
+| `make open` | Build and open `paper.docx` (requires `xdg-open`) |
+| `make clean` | Remove generated files |
+| `make setup` | Initialize submodule and install npm dependencies |
+| `make watch` | Auto-rebuild on `paper.md` changes (requires `inotifywait`) |
+| `make lint` | Run markdownlint on `paper.md` |
+| `make spell` | Run hunspell spell checker on `paper.md` |
+| `make check-links` | Validate links in `paper.md` |
+| `make count` | Word count of paper body (excluding YAML frontmatter) |
+| `make validate` | Run `lint` + `spell` + `check-links` together |
+| `make help` | Print all available targets with descriptions |
 
 Example:
 ```bash
-make build
+make setup   # first-time setup
+make build   # build the paper
 ```
 
 ## Downloading the Latest Build
@@ -84,6 +98,46 @@ To modify the paper:
 2. Commit and push your changes
 3. GitHub Actions will automatically build the updated document
 4. Download the new version following the steps above
+
+## YAML Frontmatter Reference
+
+The `ispras_templates:` block in `paper.md` supports the following fields:
+
+| Field | Required | Description |
+|---|---|---|
+| `header_ru` / `header_en` | Yes | Paper title in Russian / English |
+| `authors` | Yes | List of authors (see below) |
+| `organizations_ru` / `organizations_en` | Yes | Affiliated organizations |
+| `abstract_ru` / `abstract_en` | Yes | Paper abstract in Russian / English |
+| `keywords_ru` / `keywords_en` | Yes | Comma-separated keywords. Use `@none` to omit |
+| `links` | Yes | Numbered references list |
+| `for_citation_ru` / `for_citation_en` | Yes | Citation string |
+| `page_header_ru` / `page_header_en` | Yes | Running page header. Use `@use_citation` to reuse citation string |
+| `acknowledgements_ru` / `acknowledgements_en` | No | Acknowledgements section |
+
+Each author entry supports: `name_ru`, `name_en`, `orcid`, `email`, `details_ru`, `details_en`.
+
+## Supported Features
+
+The converter supports the following Markdown extensions:
+
+- **Images with captions** — `<div class="img-caption">` for bilingual captions
+- **Tables with captions** — `<div class="table-caption">` for bilingual captions
+- **Code listings with captions** — `<div class="listing-caption">` for bilingual captions
+- **Math formulas** — LaTeX via `$$...$$` blocks
+- **Nested lists** — use `<!-- ListMode -->` comments to switch list rendering mode
+- **In-text citations** — `[1]`, `[2, 3]` reference links
+- **Bilingual content** — full Russian/English support for all metadata fields
+
+For a complete example, see `proceedings-md/sample/sample.md`.
+
+## Troubleshooting
+
+- **Pandoc not found** — install Pandoc: `sudo apt install pandoc` or see [pandoc.org](https://pandoc.org/installing.html)
+- **Word shows corruption warning** — this is a known false alarm; click "Yes" to open the file (see [proceedings-md README](https://github.com/ispras/proceedings-md#readme))
+- **Submodule not initialized** — run `make setup` or `git submodule update --init`
+- **inotifywait not found** — install `inotify-tools`: `sudo apt install inotify-tools` (needed for `make watch`)
+- **hunspell not found** — install hunspell with dictionaries: `sudo apt install hunspell hunspell-en-us hunspell-ru`
 
 ## About ISPRAS Proceedings
 
