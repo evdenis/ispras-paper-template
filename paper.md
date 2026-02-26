@@ -28,7 +28,7 @@ ispras_templates:
     - >-
       OpenBSD. Доступно по ссылке: https://www.openbsd.org/, 19.05.2025.
     - >-
-      Linux Kernel Self-Protection Projection (KSPP). Доступно по ссылке: https://kspp.github.io/, 19.05.2025.
+      Linux Kernel Self-Protection Project (KSPP). Доступно по ссылке: https://kspp.github.io/, 19.05.2025.
     - >-
       Freund J., Jones J. Measuring and Managing Information Risk: A FAIR Approach.- Amsterdam: Butterworth-Heinemann, 2015, DOI: https://doi.org/10.1016/B978-0-12-420231-3.00001-4.
 
@@ -87,6 +87,68 @@ ispras_templates:
 ---
 
 ## 1. Введение
+
+<!--
+=== TEMPLATE EXAMPLES ===
+Below are examples of supported features. Uncomment and adapt as needed.
+
+--- Image with bilingual caption ---
+
+![](images/example.png)
+
+<div class="img-caption">
+Рис. 1. Описание изображения.
+Fig. 1. Image description.
+</div>
+
+--- Table with bilingual caption ---
+
+<div class="table-caption">
+Таблица 1. Описание таблицы.
+Table 1. Table description.
+</div>
+
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+
+--- Code listing with bilingual caption ---
+
+<div class="listing-caption">
+Листинг 1. Описание листинга.
+Listing 1. Listing description.
+</div>
+
+```c
+int main(void) {
+    return 0;
+}
+```
+
+--- Math formula ---
+
+$$E = mc^2$$
+
+--- Lists with ListMode switching ---
+
+<!-- ListMode -->
+
+1. First ordered item
+2. Second ordered item
+   - Nested bullet item
+   - Another nested item
+
+<!-- ListMode -->
+
+- Bullet item one
+- Bullet item two
+
+--- In-text citation reference ---
+
+This is discussed in detail in [1]. See also [2, 3].
+
+=== END TEMPLATE EXAMPLES ===
+-->
 
 ## 2. Заключение
 
