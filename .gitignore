@@ -76,4 +76,8 @@ Thumbs.db
 # Node
 node_modules/
 
+# LanguageTool (downloaded locally for grammar checking)
+LanguageTool-*/
+lt.zip
+
 CLAUDE.md

@@ -1,6 +1,9 @@
 # Path to https://github.com/ispras/proceedings-md
 PROCEEDINGS_MD ?= proceedings-md/src/main.js
 
+# Path to LanguageTool command-line JAR
+LANGUAGETOOL_JAR ?= languagetool-commandline.jar
+
 
 default: build
 
@@ -47,10 +50,15 @@ spell:
 check-links:
 	npx markdown-link-check paper.md --config .markdown-link-check.json
 
+grammar:
+	@sed '1,/^---$$/d' paper.md \
+		| sed '/^<!--/,/-->$$/d' \
+		| java -jar $(LANGUAGETOOL_JAR) --autoDetect -
+
 count:
 	@sed '1,/^---$$/d' paper.md | sed '/^<!--/,/-->$$/d' | wc -w
 
-validate: lint spell check-links
+validate: lint spell check-links grammar
 
 help:
 	@echo "Available targets:"
@@ -62,8 +70,9 @@ help:
 	@echo "  make lint         — Run markdownlint on paper.md"
 	@echo "  make spell        — Run hunspell spell checker on paper.md"
 	@echo "  make check-links  — Check links in paper.md"
+	@echo "  make grammar      — Run LanguageTool grammar checker on paper.md"
 	@echo "  make count        — Word count of paper body (excluding YAML frontmatter)"
-	@echo "  make validate     — Run lint + spell + check-links"
+	@echo "  make validate     — Run lint + spell + check-links + grammar"
 	@echo "  make help         — Show this help message"
 
-.PHONY: default build open clean setup watch lint spell check-links count validate help
+.PHONY: default build open clean setup watch lint spell grammar check-links count validate help

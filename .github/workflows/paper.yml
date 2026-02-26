@@ -59,6 +59,30 @@ jobs:
       continue-on-error: true
       run: npx markdown-link-check paper.md --config .markdown-link-check.json
 
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Cache LanguageTool
+      id: cache-lt
+      uses: actions/cache@v4
+      with:
+        path: LanguageTool-*
+        key: languagetool-stable
+
+    - name: Install LanguageTool
+      if: steps.cache-lt.outputs.cache-hit != 'true'
+      run: |
+        curl -L https://languagetool.org/download/LanguageTool-stable.zip -o lt.zip
+        unzip -q lt.zip
+        rm lt.zip
+
+    - name: Grammar check
+      continue-on-error: true
+      run: make grammar LANGUAGETOOL_JAR="$(ls LanguageTool-*/languagetool-commandline.jar)"
+
     - name: Build paper.docx
       env:
         PROCEEDINGS_MD: ./proceedings-md/src/main.js

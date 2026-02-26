@@ -19,6 +19,7 @@ To build the paper locally, you need:
 - Pandoc
 - Git
 - hunspell with `en_US` and `ru_RU` dictionaries (`sudo apt install hunspell hunspell-en-us hunspell-ru`)
+- Java 17+ and [LanguageTool](https://languagetool.org/download/) CLI JAR (for `make grammar`)
 
 ### Setup
 
@@ -46,9 +47,10 @@ To build the paper locally, you need:
 | `make watch` | Auto-rebuild on `paper.md` changes (requires `inotifywait`) |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
+| `make grammar` | Run LanguageTool grammar checker on `paper.md` (requires Java + LanguageTool JAR) |
 | `make check-links` | Validate links in `paper.md` |
 | `make count` | Word count of paper body (excluding YAML frontmatter) |
-| `make validate` | Run `lint` + `spell` + `check-links` together |
+| `make validate` | Run `lint` + `spell` + `check-links` + `grammar` together |
 | `make help` | Print all available targets with descriptions |
 
 Example:
@@ -138,6 +140,7 @@ For a complete example, see `proceedings-md/sample/sample.md`.
 - **Submodule not initialized** — run `make setup` or `git submodule update --init`
 - **inotifywait not found** — install `inotify-tools`: `sudo apt install inotify-tools` (needed for `make watch`)
 - **hunspell not found** — install hunspell with dictionaries: `sudo apt install hunspell hunspell-en-us hunspell-ru`
+- **LanguageTool JAR not found** — download from [languagetool.org](https://languagetool.org/download/LanguageTool-stable.zip), unzip, and either place `languagetool-commandline.jar` in the project root or pass the path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`
 
 ## About ISPRAS Proceedings
 
