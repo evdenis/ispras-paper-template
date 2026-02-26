@@ -36,13 +36,28 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Install npm dependencies
       if: steps.cache-deps.outputs.cache-hit != 'true'
       run: |
         cd proceedings-md
         npm install
+
+    - name: Lint markdown
+      continue-on-error: true
+      run: npx markdownlint-cli2 paper.md
+
+    - name: Install hunspell
+      run: sudo apt-get install -y hunspell hunspell-en-us hunspell-ru
+
+    - name: Spell check
+      continue-on-error: true
+      run: make spell
+
+    - name: Check links
+      continue-on-error: true
+      run: npx markdown-link-check paper.md --config .markdown-link-check.json
 
     - name: Build paper.docx
       env:
