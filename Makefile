@@ -15,4 +15,55 @@ open: paper.docx
 clean:
 	rm -f paper.docx paper.docx.tmp
 
-.PHONY: open build clean
+setup:
+	git submodule update --init
+	cd proceedings-md && npm install
+
+watch:
+	@echo "Watching paper.md for changes... (press Ctrl+C to stop)"
+	@while inotifywait -e modify paper.md; do \
+		$(MAKE) build; \
+	done
+
+lint:
+	npx markdownlint-cli2 paper.md
+
+spell:
+	@misspelled=$$(sed '1,/^---$$/d' paper.md \
+		| sed '/^<!--/,/-->$$/d' \
+		| sed -E 's|https?://[^ ]*||g' \
+		| sed -E 's|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+||g' \
+		| sed -E 's|[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9X]{4}||g' \
+		| hunspell -d en_US,ru_RU -l \
+		| sort -u); \
+	if [ -n "$$misspelled" ]; then \
+		echo "Misspelled words found:"; \
+		echo "$$misspelled"; \
+		exit 1; \
+	else \
+		echo "No misspelled words found."; \
+	fi
+
+check-links:
+	npx markdown-link-check paper.md --config .markdown-link-check.json
+
+count:
+	@sed '1,/^---$$/d' paper.md | sed '/^<!--/,/-->$$/d' | wc -w
+
+validate: lint spell check-links
+
+help:
+	@echo "Available targets:"
+	@echo "  make build        — Build paper.docx from paper.md"
+	@echo "  make open         — Build and open paper.docx"
+	@echo "  make clean        — Remove generated files"
+	@echo "  make setup        — Initialize submodule and install dependencies"
+	@echo "  make watch        — Auto-rebuild on paper.md changes (requires inotifywait)"
+	@echo "  make lint         — Run markdownlint on paper.md"
+	@echo "  make spell        — Run hunspell spell checker on paper.md"
+	@echo "  make check-links  — Check links in paper.md"
+	@echo "  make count        — Word count of paper body (excluding YAML frontmatter)"
+	@echo "  make validate     — Run lint + spell + check-links"
+	@echo "  make help         — Show this help message"
+
+.PHONY: default build open clean setup watch lint spell check-links count validate help
