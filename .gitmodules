@@ -1,4 +1,4 @@
 [submodule "proceedings-md"]
 	path = proceedings-md
-	url = https://github.com/ispras/proceedings-md.git
+	url = https://github.com/evdenis/proceedings-md.git
 	ignore = dirty
