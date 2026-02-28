@@ -12,11 +12,14 @@ build: paper.docx
 paper.docx: paper.md
 	node $(PROCEEDINGS_MD) $< $@
 
+pdf: paper.docx
+	libreoffice --headless --convert-to pdf $<
+
 open: paper.docx
 	xdg-open $<
 
 clean:
-	rm -f paper.docx paper.docx.tmp
+	rm -f paper.docx paper.docx.tmp paper.pdf
 
 setup:
 	git submodule update --init
@@ -63,6 +66,7 @@ validate: lint spell check-links grammar
 help:
 	@echo "Available targets:"
 	@echo "  make build        — Build paper.docx from paper.md"
+	@echo "  make pdf          — Build paper.pdf from paper.docx (requires LibreOffice)"
 	@echo "  make open         — Build and open paper.docx"
 	@echo "  make clean        — Remove generated files"
 	@echo "  make setup        — Initialize submodule and install dependencies"
@@ -75,4 +79,4 @@ help:
 	@echo "  make validate     — Run lint + spell + check-links + grammar"
 	@echo "  make help         — Show this help message"
 
-.PHONY: default build open clean setup watch lint spell grammar check-links count validate help
+.PHONY: default build pdf open clean setup watch lint spell grammar check-links count validate help

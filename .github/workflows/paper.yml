@@ -88,10 +88,18 @@ jobs:
         PROCEEDINGS_MD: ./proceedings-md/src/main.js
       run: make build
 
-    - name: Upload paper.docx as artifact
+    - name: Install LibreOffice
+      run: sudo apt-get install -y libreoffice
+
+    - name: Build paper.pdf
+      run: make pdf
+
+    - name: Upload paper as artifact
       uses: actions/upload-artifact@v4
       with:
         name: paper
-        path: paper.docx
+        path: |
+          paper.docx
+          paper.pdf
         retention-days: 7
 
