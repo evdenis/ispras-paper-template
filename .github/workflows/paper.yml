@@ -30,7 +30,7 @@ jobs:
 
     - name: Cache node_modules
       id: cache-deps
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: proceedings-md/node_modules
         key: ${{ runner.os }}-deps-${{ hashFiles('proceedings-md/package-lock.json') }}
@@ -74,7 +74,7 @@ jobs:
 
     - name: Cache LanguageTool
       id: cache-lt
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: LanguageTool-*
         key: languagetool-stable
