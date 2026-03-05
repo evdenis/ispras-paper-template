@@ -29,11 +29,14 @@ To build the paper locally, you need:
    cd ispras-paper-template
    ```
 
-2. Clone the proceedings-md repository (required for the conversion process):
+2. Initialize the submodule and build the converter:
+   ```bash
+   make setup
+   ```
+   Or manually:
    ```bash
    git submodule update --init
-   cd proceedings-md
-   npm install
+   cd proceedings-md && npm install && npm run build
    ```
 
 ### Available Make Targets
@@ -44,7 +47,7 @@ To build the paper locally, you need:
 | `make open` | Build and open `paper.docx` (requires `xdg-open`) |
 | `make clean` | Remove generated files |
 | `make setup` | Initialize submodule and install npm dependencies |
-| `make watch` | Auto-rebuild on `paper.md` changes (requires `inotifywait`) |
+| `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `inotifywait`) |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
 | `make grammar` | Run LanguageTool grammar checker on `paper.md` (requires Java + LanguageTool JAR) |
@@ -61,7 +64,7 @@ make build   # build the paper
 
 ## Downloading the Latest Build
 
-This repository is configured with GitHub Actions to automatically build the paper when changes are made to `paper.md`. To download the latest build:
+This repository is configured with GitHub Actions to automatically build the paper when changes are made to `paper.md` or `bibliography.bib`. To download the latest build:
 
 1. Go to the repository's GitHub page
 2. Click on the "Actions" tab
@@ -96,7 +99,7 @@ This will show you the textual changes between different versions of your docume
 
 To modify the paper:
 
-1. Edit the `paper.md` file
+1. Edit `paper.md` (content) and/or `bibliography.bib` (references)
 2. Commit and push your changes
 3. GitHub Actions will automatically build the updated document
 4. Download the new version following the steps above
@@ -109,26 +112,29 @@ The `ispras_templates:` block in `paper.md` supports the following fields:
 |---|---|---|
 | `header_ru` / `header_en` | Yes | Paper title in Russian / English |
 | `authors` | Yes | List of authors (see below) |
-| `organizations_ru` / `organizations_en` | Yes | Affiliated organizations |
+| `organizations` | Yes | List of organizations with `id`, `name_ru`, `name_en` (see below) |
+| `bibliography` | Yes | Path to a `.bib` file with BibTeX references (e.g., `bibliography.bib`) |
 | `abstract_ru` / `abstract_en` | Yes | Paper abstract in Russian / English |
 | `keywords_ru` / `keywords_en` | Yes | Comma-separated keywords. Use `@none` to omit |
-| `links` | Yes | Numbered references list |
-| `for_citation_ru` / `for_citation_en` | Yes | Citation string |
-| `page_header_ru` / `page_header_en` | Yes | Running page header. Use `@use_citation` to reuse citation string |
+| `for_citation_ru` / `for_citation_en` | No | Citation string (auto-generated from authors and title if omitted) |
+| `page_header_ru` / `page_header_en` | No | Running page header (auto-generated from authors and title if omitted) |
 | `acknowledgements_ru` / `acknowledgements_en` | No | Acknowledgements section |
 
-Each author entry supports: `name_ru`, `name_en`, `orcid`, `email`, `details_ru`, `details_en`.
+Each **author** entry supports: `name_ru`, `name_en`, `orcid`, `email`, `organizations` (list of organization IDs), `details_ru`, `details_en`.
+
+Each **organization** entry has: `id` (unique key), `name_ru` (string or list of strings), `name_en` (string or list of strings). Authors reference organizations by `id`. Multi-line names are supported via YAML arrays.
 
 ## Supported Features
 
 The converter supports the following Markdown extensions:
 
-- **Images with captions** — `<div class="img-caption">` for bilingual captions
-- **Tables with captions** — `<div class="table-caption">` for bilingual captions
-- **Code listings with captions** — `<div class="listing-caption">` for bilingual captions
+- **Images with captions** — fenced div `::: img-caption` for bilingual captions
+- **Tables with captions** — fenced div `::: table-caption` for bilingual captions
+- **Code listings with captions** — fenced div `::: listing-caption` for bilingual captions
+- **Auto-numbered references** — `@ref:fig:label`, `@ref:tab:label`, `@ref:lst:label` for cross-references
+- **Bibliography** — BibTeX `.bib` file with `[@Key]` citations in text
 - **Math formulas** — LaTeX via `$$...$$` blocks
 - **Nested lists** — use `<!-- ListMode -->` comments to switch list rendering mode
-- **In-text citations** — `[1]`, `[2, 3]` reference links
 - **Bilingual content** — full Russian/English support for all metadata fields
 
 For a complete example, see `proceedings-md/sample/sample.md`.

@@ -5,11 +5,13 @@ on:
     branches: [ master ]
     paths:
       - 'paper.md'
+      - 'bibliography.bib'
       - '.github/workflows/**'
   pull_request:
     branches: [ master ]
     paths:
       - 'paper.md'
+      - 'bibliography.bib'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -43,6 +45,11 @@ jobs:
       run: |
         cd proceedings-md
         npm install
+
+    - name: Build converter
+      run: |
+        cd proceedings-md
+        npm run build
 
     - name: Lint markdown
       continue-on-error: true
