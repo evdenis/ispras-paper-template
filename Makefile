@@ -9,7 +9,7 @@ default: build
 
 build: paper.docx
 
-paper.docx: paper.md
+paper.docx: paper.md $(wildcard bibliography.bib)
 	node $(PROCEEDINGS_MD) $< $@
 
 pdf: paper.docx
@@ -23,11 +23,11 @@ clean:
 
 setup:
 	git submodule update --init
-	cd proceedings-md && npm install
+	cd proceedings-md && npm install && npm run build
 
 watch:
-	@echo "Watching paper.md for changes... (press Ctrl+C to stop)"
-	@while inotifywait -e modify paper.md; do \
+	@echo "Watching paper.md and bibliography.bib for changes... (press Ctrl+C to stop)"
+	@while inotifywait -e modify paper.md bibliography.bib; do \
 		$(MAKE) build; \
 	done
 
