@@ -44,6 +44,8 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 | Software | Version | Install (Debian/Ubuntu) | Used by |
 |---|---|---|---|
 | inotify-tools | any | `sudo apt install inotify-tools` | `make watch` |
+| ghostscript | any | `sudo apt install ghostscript` | `make optimize-pdf`, `make optimize-pdf-gs` |
+| qpdf | any | `sudo apt install qpdf` | `make optimize-pdf`, `make optimize-pdf-qpdf` |
 | pdftotext | any | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
 
 > **Note:** LanguageTool requires manual download. Unzip the archive into the project root (the Makefile expects `languagetool-commandline.jar` in the working directory), or pass a custom path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`.
@@ -72,6 +74,9 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 |---|---|
 | `make build` | Build `paper.docx` from `paper.md` |
 | `make open` | Build and open `paper.docx` (requires `xdg-open`) |
+| `make optimize-pdf` | Optimize `paper.pdf` with Ghostscript + qpdf pipeline (reduces file size) |
+| `make optimize-pdf-gs` | Optimize `paper.pdf` with Ghostscript only |
+| `make optimize-pdf-qpdf` | Optimize `paper.pdf` with qpdf only |
 | `make clean` | Remove generated files |
 | `make setup` | Initialize submodule and install npm dependencies |
 | `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `inotifywait`) |

@@ -101,6 +101,12 @@ jobs:
     - name: Build paper.pdf
       run: make pdf
 
+    - name: Install Ghostscript and qpdf
+      run: sudo apt-get install -y ghostscript qpdf
+
+    - name: Optimize paper.pdf
+      run: make optimize-pdf
+
     - name: Upload paper as artifact
       uses: actions/upload-artifact@v7
       with:
