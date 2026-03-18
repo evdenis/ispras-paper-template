@@ -13,13 +13,40 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 
 ### Prerequisites
 
-To build the paper locally, you need:
+#### Core (required for `make build`)
 
-- Node.js
-- Pandoc
-- Git
-- hunspell with `en_US` and `ru_RU` dictionaries (`sudo apt install hunspell hunspell-en-us hunspell-ru`)
-- Java 17+ and [LanguageTool](https://languagetool.org/download/) CLI JAR (for `make grammar`)
+| Software | Version | Install (Debian/Ubuntu) |
+|---|---|---|
+| Git | any recent | `sudo apt install git` |
+| Node.js | 22+ | [nodesource.com](https://github.com/nodesource/distributions) or `nvm install 22` |
+| npm | bundled with Node.js | — |
+| Pandoc | any recent | `sudo apt install pandoc` or [pandoc.org](https://pandoc.org/installing.html) |
+| Make | any | `sudo apt install make` |
+
+#### PDF generation (`make pdf`)
+
+| Software | Version | Install (Debian/Ubuntu) |
+|---|---|---|
+| LibreOffice | any recent | `sudo apt install libreoffice` |
+
+#### Validation (`make validate`)
+
+| Software | Version | Install (Debian/Ubuntu) | Used by |
+|---|---|---|---|
+| hunspell | any recent | `sudo apt install hunspell hunspell-en-us hunspell-ru` | `make spell` |
+| Java (JRE/JDK) | 17+ | `sudo apt install openjdk-17-jre` | `make grammar` |
+| [LanguageTool](https://languagetool.org/download/) | stable | Download and unzip [LanguageTool-stable.zip](https://languagetool.org/download/LanguageTool-stable.zip) | `make grammar` |
+| markdownlint-cli2 | latest | runs via npx (no global install needed) | `make lint` |
+| markdown-link-check | latest | runs via npx (no global install needed) | `make check-links` |
+
+#### Optional
+
+| Software | Version | Install (Debian/Ubuntu) | Used by |
+|---|---|---|---|
+| inotify-tools | any | `sudo apt install inotify-tools` | `make watch` |
+| pdftotext | any | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
+
+> **Note:** LanguageTool requires manual download. Unzip the archive into the project root (the Makefile expects `languagetool-commandline.jar` in the working directory), or pass a custom path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`.
 
 ### Setup
 
