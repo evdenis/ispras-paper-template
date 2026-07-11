@@ -6,12 +6,14 @@ on:
     paths:
       - 'paper.md'
       - 'bibliography.bib'
+      - 'Makefile'
       - '.github/workflows/**'
   pull_request:
     branches: [ master ]
     paths:
       - 'paper.md'
       - 'bibliography.bib'
+      - 'Makefile'
       - '.github/workflows/**'
   workflow_dispatch:
 

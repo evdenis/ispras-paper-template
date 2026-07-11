@@ -15,40 +15,53 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 
 #### Core (required for `make build`)
 
-| Software | Version | Install (Debian/Ubuntu) |
-|---|---|---|
-| Git | any recent | `sudo apt install git` |
-| Node.js | 22+ | [nodesource.com](https://github.com/nodesource/distributions) or `nvm install 22` |
-| npm | bundled with Node.js | — |
-| Pandoc | any recent | `sudo apt install pandoc` or [pandoc.org](https://pandoc.org/installing.html) |
-| Make | any | `sudo apt install make` |
+| Software | Version | Install (macOS) | Install (Debian/Ubuntu) |
+|---|---|---|---|
+| Git | any recent | Xcode Command Line Tools (`xcode-select --install`) | `sudo apt install git` |
+| Node.js | 22+ | `brew install node` or `nvm install 22` | [nodesource.com](https://github.com/nodesource/distributions) or `nvm install 22` |
+| npm | bundled with Node.js | — | — |
+| Pandoc | any recent | `brew install pandoc` | `sudo apt install pandoc` or [pandoc.org](https://pandoc.org/installing.html) |
+| Make | any | Xcode Command Line Tools (`xcode-select --install`) | `sudo apt install make` |
 
 #### PDF generation (`make pdf`)
 
-| Software | Version | Install (Debian/Ubuntu) |
-|---|---|---|
-| LibreOffice | any recent | `sudo apt install libreoffice` |
+| Software | Version | Install (macOS) | Install (Debian/Ubuntu) |
+|---|---|---|---|
+| LibreOffice | any recent | `brew install --cask libreoffice` | `sudo apt install libreoffice` |
 
 #### Validation (`make validate`)
 
-| Software | Version | Install (Debian/Ubuntu) | Used by |
-|---|---|---|---|
-| hunspell | any recent | `sudo apt install hunspell hunspell-en-us hunspell-ru` | `make spell` |
-| Java (JRE/JDK) | 17+ | `sudo apt install openjdk-17-jre` | `make grammar` |
-| [LanguageTool](https://languagetool.org/download/) | stable | Download and unzip [LanguageTool-stable.zip](https://languagetool.org/download/LanguageTool-stable.zip) | `make grammar` |
-| markdownlint-cli2 | latest | runs via npx (no global install needed) | `make lint` |
-| markdown-link-check | latest | runs via npx (no global install needed) | `make check-links` |
+| Software | Version | Install (macOS) | Install (Debian/Ubuntu) | Used by |
+|---|---|---|---|---|
+| hunspell | any recent | `brew install hunspell` (then install dictionaries below) | `sudo apt install hunspell hunspell-en-us hunspell-ru` | `make spell` |
+| Java (JRE/JDK) | 17+ | Included by `brew install languagetool`, or `brew install openjdk@17` | `sudo apt install openjdk-17-jre` | `make grammar` with a standalone JAR |
+| [LanguageTool](https://languagetool.org/download/) | stable | `brew install languagetool` | Download and unzip [LanguageTool-stable.zip](https://languagetool.org/download/LanguageTool-stable.zip) | `make grammar` |
+| markdownlint-cli2 | latest | runs via npx (no global install needed) | runs via npx (no global install needed) | `make lint` |
+| markdown-link-check | latest | runs via npx (no global install needed) | runs via npx (no global install needed) | `make check-links` |
 
 #### Optional
 
-| Software | Version | Install (Debian/Ubuntu) | Used by |
-|---|---|---|---|
-| inotify-tools | any | `sudo apt install inotify-tools` | `make watch` |
-| ghostscript | any | `sudo apt install ghostscript` | `make optimize-pdf`, `make optimize-pdf-gs` |
-| qpdf | any | `sudo apt install qpdf` | `make optimize-pdf`, `make optimize-pdf-qpdf` |
-| pdftotext | any | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
+| Software | Version | Install (macOS) | Install (Debian/Ubuntu) | Used by |
+|---|---|---|---|---|
+| File watcher | any | `brew install fswatch` | `sudo apt install inotify-tools` | `make watch` |
+| ghostscript | any | `brew install ghostscript` | `sudo apt install ghostscript` | `make optimize-pdf`, `make optimize-pdf-gs` |
+| qpdf | any | `brew install qpdf` | `sudo apt install qpdf` | `make optimize-pdf`, `make optimize-pdf-qpdf` |
+| pdftotext | any | `brew install poppler` | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
 
-> **Note:** LanguageTool requires manual download. Unzip the archive into the project root (the Makefile expects `languagetool-commandline.jar` in the working directory), or pass a custom path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`.
+On macOS, Homebrew installs the Hunspell executable without dictionaries. Install the required English and Russian dictionaries in the user dictionary directory:
+
+```bash
+mkdir -p "$HOME/Library/Spelling"
+curl -fL https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.aff -o "$HOME/Library/Spelling/en_US.aff"
+curl -fL https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.dic -o "$HOME/Library/Spelling/en_US.dic"
+curl -fL https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff -o "$HOME/Library/Spelling/ru_RU.aff"
+curl -fL https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic -o "$HOME/Library/Spelling/ru_RU.dic"
+printf 'hello\nпривет\nошипка\n' | hunspell -d en_US,ru_RU -l
+```
+
+The final command should print only `ошипка`.
+
+> **LanguageTool JAR fallback:** On systems without the `languagetool` command, unzip the standalone archive into the project root, or pass a custom path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`.
 
 ### Setup
 
@@ -73,20 +86,23 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 | Target | Description |
 |---|---|
 | `make build` | Build `paper.docx` from `paper.md` |
-| `make open` | Build and open `paper.docx` (requires `xdg-open`) |
+| `make pdf` | Build `paper.pdf` from `paper.docx` using LibreOffice |
+| `make open` | Build and open `paper.docx` using the platform document opener |
 | `make optimize-pdf` | Optimize `paper.pdf` with Ghostscript + qpdf pipeline (reduces file size) |
 | `make optimize-pdf-gs` | Optimize `paper.pdf` with Ghostscript only |
 | `make optimize-pdf-qpdf` | Optimize `paper.pdf` with qpdf only |
 | `make clean` | Remove generated files |
 | `make setup` | Initialize submodule and install npm dependencies |
-| `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `inotifywait`) |
+| `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `fswatch` or `inotifywait`) |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
-| `make grammar` | Run LanguageTool grammar checker on `paper.md` (requires Java + LanguageTool JAR) |
+| `make grammar` | Run LanguageTool grammar checker on `paper.md` using its command or standalone JAR |
 | `make check-links` | Validate links in `paper.md` |
 | `make count` | Word count of paper body (excluding YAML frontmatter) |
 | `make validate` | Run `lint` + `spell` + `check-links` + `grammar` together |
 | `make help` | Print all available targets with descriptions |
+
+Platform commands can be overridden when installed in a non-standard location, for example: `make open OPENER=/path/to/opener`, `make pdf LIBREOFFICE=/path/to/soffice`, or `make grammar LANGUAGETOOL=/path/to/languagetool`.
 
 Example:
 ```bash
@@ -173,12 +189,12 @@ For a complete example, see `proceedings-md/sample/sample.md`.
 
 ## Troubleshooting
 
-- **Pandoc not found** — install Pandoc: `sudo apt install pandoc` or see [pandoc.org](https://pandoc.org/installing.html)
+- **Pandoc not found** — install Pandoc with `brew install pandoc` (macOS), `sudo apt install pandoc` (Debian/Ubuntu), or see [pandoc.org](https://pandoc.org/installing.html)
 - **Word shows corruption warning** — this is a known false alarm; click "Yes" to open the file (see [proceedings-md README](https://github.com/ispras/proceedings-md#readme))
 - **Submodule not initialized** — run `make setup` or `git submodule update --init`
-- **inotifywait not found** — install `inotify-tools`: `sudo apt install inotify-tools` (needed for `make watch`)
-- **hunspell not found** — install hunspell with dictionaries: `sudo apt install hunspell hunspell-en-us hunspell-ru`
-- **LanguageTool JAR not found** — download from [languagetool.org](https://languagetool.org/download/LanguageTool-stable.zip), unzip, and either place `languagetool-commandline.jar` in the project root or pass the path: `make grammar LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`
+- **File watcher not found** — install `fswatch` with `brew install fswatch` (macOS) or `inotify-tools` with `sudo apt install inotify-tools` (Debian/Ubuntu)
+- **Hunspell or dictionaries not found** — follow the macOS dictionary steps above, or install `hunspell hunspell-en-us hunspell-ru` on Debian/Ubuntu
+- **LanguageTool not found** — use `brew install languagetool` on macOS, or download the standalone archive and set `LANGUAGETOOL_JAR=/path/to/languagetool-commandline.jar`
 
 ## About ISPRAS Proceedings
 
