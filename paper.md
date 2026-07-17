@@ -10,10 +10,12 @@ ispras_templates:
       email: '<efremov@ispras.ru>'
       organizations: [ispras]
       details_ru: >-
-        Денис Валентинович ЕФРЕМОВ – старший научный сотрудник. Сфера научных интересов:
+        Денис Валентинович ЕФРЕМОВ – старший научный сотрудник.
+        Сфера научных интересов:
         формальная верификация, статический и динамический анализ.
       details_en: >-
-        Denis Valentinovich EFREMOV – senior researcher. Research interests:
+        Denis Valentinovich EFREMOV – senior researcher.
+        Research interests:
         formal verification, static and dynamic analysis.
 
     - name_ru: 'А.К. Петренко'
@@ -22,9 +24,11 @@ ispras_templates:
       email: '<petrenko@ispras.ru>'
       organizations: [ispras, msu, hse]
       details_ru: >-
-        Александр Константинович ПЕТРЕНКО — профессор, доктор физико-математических наук, заведующий отделом Технологий программирования ИСП РАН, профессор кафедр Системного программирования ВМК МГУ и ФКН НИУ ВШЭ. Научные интересы: формальные методы программной инженерии, языки спецификаций и моделирования, их применение для поддержки разработки и верификации программного обеспечения.
+        Александр Константинович ПЕТРЕНКО — профессор, доктор физико-математических наук, заведующий отделом Технологий программирования ИСП РАН, профессор кафедр Системного программирования ВМК МГУ и ФКН НИУ ВШЭ.
+        Научные интересы: формальные методы программной инженерии, языки спецификаций и моделирования, их применение для поддержки разработки и верификации программного обеспечения.
       details_en: >-
-        Alexander Konstantinovich PETRENKO — Professor, Dr. Sci. (Phys.-Math.), Head of Software Engineering Department of the Ivannikov Institute for System Programming, Russian Academy of Sciences, Professor of the Department of System Programming, Faculty of Computational Mathematics and Cybernetics, Moscow State University and the Faculty of Computer Science, National Research University Higher School of Economics. Research interests: formal methods of software engineering, specification and modeling languages, and their use in software development and verification.
+        Alexander Konstantinovich PETRENKO — Professor, Dr. Sci. (Phys.-Math.), Head of Software Engineering Department of the Ivannikov Institute for System Programming, Russian Academy of Sciences, Professor of the Department of System Programming, Faculty of Computational Mathematics and Cybernetics, Moscow State University and the Faculty of Computer Science, National Research University Higher School of Economics.
+        Research interests: formal methods of software engineering, specification and modeling languages, and their use in software development and verification.
 
   bibliography: bibliography.bib
 
@@ -80,28 +84,33 @@ ispras_templates:
 
 <!--
 === TEMPLATE EXAMPLES ===
-Below are examples of supported features. Uncomment and adapt as needed.
+Below are examples of supported features.
+Uncomment and adapt as needed.
 
 --- Image with bilingual caption (fenced div + @ref) ---
 
 ![](images/example.png)
 
 ::: img-caption
-Рис. @ref:fig:example. Описание изображения.
+Рис. @ref:fig:example.
+Описание изображения.
 :::
 
 ::: img-caption
-Fig. @ref:fig:example. Image description.
+Fig. @ref:fig:example.
+Image description.
 :::
 
 --- Table with bilingual caption (fenced div + @ref) ---
 
 ::: table-caption
-Табл. @ref:tab:example. Описание таблицы.
+Табл. @ref:tab:example.
+Описание таблицы.
 :::
 
 ::: table-caption
-Table @ref:tab:example. Table description.
+Table @ref:tab:example.
+Table description.
 :::
 
 | Column 1 | Column 2 | Column 3 |
@@ -111,11 +120,13 @@ Table @ref:tab:example. Table description.
 --- Code listing with bilingual caption (fenced div + @ref) ---
 
 ::: listing-caption
-Листинг @ref:lst:example. Описание листинга.
+Листинг @ref:lst:example.
+Описание листинга.
 :::
 
 ::: listing-caption
-Listing @ref:lst:example. Listing description.
+Listing @ref:lst:example.
+Listing description.
 :::
 
 ```c
@@ -144,7 +155,8 @@ $$E = mc^2$$
 
 --- In-text citation reference (biblatex-style) ---
 
-This is discussed in detail in [@OpenBSD]. See also [@KSPP, @Freund2015].
+This is discussed in detail in [@OpenBSD].
+See also [@KSPP, @Freund2015].
 
 === END TEMPLATE EXAMPLES ===
 -->

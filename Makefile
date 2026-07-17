@@ -113,6 +113,10 @@ watch:
 lint:
 	npx markdownlint-cli2 paper.md
 
+check-sentence-lines:
+	node --test scripts/check-sentence-lines.test.mjs
+	node scripts/check-sentence-lines.mjs paper.md
+
 spell:
 	@if ! command -v hunspell >/dev/null 2>&1; then \
 		echo "Error: hunspell not found. Install with 'brew install hunspell' (macOS) or 'sudo apt install hunspell hunspell-en-us hunspell-ru' (Debian/Ubuntu)." >&2; \
@@ -161,7 +165,7 @@ grammar:
 count:
 	@sed '1,/^---$$/d' paper.md | sed '/^<!--/,/-->$$/d' | wc -w
 
-validate: lint spell check-links grammar
+validate: lint check-sentence-lines spell check-links grammar
 
 help:
 	@echo "Available targets:"
@@ -175,11 +179,12 @@ help:
 	@echo "  make setup        — Initialize submodule and install dependencies"
 	@echo "  make watch        — Auto-rebuild on paper.md changes (requires fswatch or inotifywait)"
 	@echo "  make lint         — Run markdownlint on paper.md"
+	@echo "  make check-sentence-lines — Enforce one prose sentence per source line"
 	@echo "  make spell        — Run hunspell spell checker on paper.md"
 	@echo "  make check-links  — Check links in paper.md"
 	@echo "  make grammar      — Run LanguageTool grammar checker on paper.md"
 	@echo "  make count        — Word count of paper body (excluding YAML frontmatter)"
-	@echo "  make validate     — Run lint + spell + check-links + grammar"
+	@echo "  make validate     — Run all source checks listed above"
 	@echo "  make help         — Show this help message"
 
-.PHONY: default build pdf optimize-pdf optimize-pdf-gs optimize-pdf-qpdf open clean setup watch lint spell grammar check-links count validate help
+.PHONY: default build pdf optimize-pdf optimize-pdf-gs optimize-pdf-qpdf open clean setup watch lint check-sentence-lines spell grammar check-links count validate help

@@ -95,11 +95,12 @@ The final command should print only `ошипка`.
 | `make setup` | Initialize submodule and install npm dependencies |
 | `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `fswatch` or `inotifywait`) |
 | `make lint` | Run markdownlint on `paper.md` |
+| `make check-sentence-lines` | Enforce one prose sentence per source line in `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
 | `make grammar` | Run LanguageTool grammar checker on `paper.md` using its command or standalone JAR |
 | `make check-links` | Validate links in `paper.md` |
 | `make count` | Word count of paper body (excluding YAML frontmatter) |
-| `make validate` | Run `lint` + `spell` + `check-links` + `grammar` together |
+| `make validate` | Run all source checks, including sentence-per-line validation |
 | `make help` | Print all available targets with descriptions |
 
 Platform commands can be overridden when installed in a non-standard location, for example: `make open OPENER=/path/to/opener`, `make pdf LIBREOFFICE=/path/to/soffice`, or `make grammar LANGUAGETOOL=/path/to/languagetool`.

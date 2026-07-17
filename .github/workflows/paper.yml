@@ -7,6 +7,8 @@ on:
       - 'paper.md'
       - 'bibliography.bib'
       - 'Makefile'
+      - 'scripts/check-sentence-lines.mjs'
+      - 'scripts/check-sentence-lines.test.mjs'
       - '.github/workflows/**'
   pull_request:
     branches: [ master ]
@@ -14,6 +16,8 @@ on:
       - 'paper.md'
       - 'bibliography.bib'
       - 'Makefile'
+      - 'scripts/check-sentence-lines.mjs'
+      - 'scripts/check-sentence-lines.test.mjs'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -56,6 +60,9 @@ jobs:
     - name: Lint markdown
       continue-on-error: true
       run: npx markdownlint-cli2 paper.md
+
+    - name: Check sentence line breaks
+      run: make check-sentence-lines
 
     - name: Install hunspell
       run: sudo apt-get install -y hunspell hunspell-en-us hunspell-ru
@@ -117,4 +124,3 @@ jobs:
           paper.docx
           paper.pdf
         retention-days: 7
-
