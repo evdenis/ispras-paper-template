@@ -85,7 +85,7 @@ The final command should print only `ошипка`.
 
 | Target | Description |
 |---|---|
-| `make build` | Build `paper.docx` from `paper.md` |
+| `make build` | Build `paper.docx` from `paper.md`, recompiling changed converter sources first |
 | `make pdf` | Build `paper.pdf` from `paper.docx` using LibreOffice |
 | `make open` | Build and open `paper.docx` using the platform document opener |
 | `make optimize-pdf` | Optimize `paper.pdf` with Ghostscript + qpdf pipeline (reduces file size) |
@@ -93,7 +93,7 @@ The final command should print only `ошипка`.
 | `make optimize-pdf-qpdf` | Optimize `paper.pdf` with qpdf only |
 | `make clean` | Remove generated files |
 | `make setup` | Initialize submodule and install npm dependencies |
-| `make watch` | Auto-rebuild on `paper.md` / `bibliography.bib` changes (requires `fswatch` or `inotifywait`) |
+| `make watch` | Auto-rebuild on paper, bibliography, or converter changes (requires `fswatch` or `inotifywait`) |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make check-sentence-lines` | Enforce one prose sentence per source line in `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
@@ -104,6 +104,10 @@ The final command should print only `ошипка`.
 | `make help` | Print all available targets with descriptions |
 
 Platform commands can be overridden when installed in a non-standard location, for example: `make open OPENER=/path/to/opener`, `make pdf LIBREOFFICE=/path/to/soffice`, or `make grammar LANGUAGETOOL=/path/to/languagetool`.
+The converter checkout defaults to `proceedings-md` and can be overridden with
+`PROCEEDINGS_MD_DIR=/path/to/proceedings-md`. Both `make build` and `make watch`
+track its TypeScript sources, build configuration, and DOCX reference template;
+conversion goes through the converter's guarded `npm run convert` command.
 
 Example:
 ```bash

@@ -1,5 +1,14 @@
-# Path to https://github.com/ispras/proceedings-md
-PROCEEDINGS_MD ?= proceedings-md/src/main.js
+# Path to the https://github.com/ispras/proceedings-md checkout
+PROCEEDINGS_MD_DIR ?= proceedings-md
+PROCEEDINGS_MD_SOURCES := $(wildcard $(PROCEEDINGS_MD_DIR)/src/*.ts)
+PROCEEDINGS_MD_BUILD_FILES := \
+	$(PROCEEDINGS_MD_DIR)/package.json \
+	$(PROCEEDINGS_MD_DIR)/tsconfig.json \
+	$(PROCEEDINGS_MD_DIR)/scripts/build.mjs \
+	$(PROCEEDINGS_MD_DIR)/resources/isp-reference.docx
+PROCEEDINGS_MD_INPUTS := $(PROCEEDINGS_MD_SOURCES) $(PROCEEDINGS_MD_BUILD_FILES)
+PAPER_SOURCES := paper.md $(wildcard bibliography.bib)
+WATCH_SOURCES := $(PAPER_SOURCES) $(PROCEEDINGS_MD_INPUTS)
 
 # Path to LanguageTool command-line JAR
 LANGUAGETOOL_JAR ?= languagetool-commandline.jar
@@ -29,8 +38,8 @@ default: build
 
 build: paper.docx
 
-paper.docx: paper.md $(wildcard bibliography.bib)
-	node "$(PROCEEDINGS_MD)" "$<" "$@"
+paper.docx: $(PAPER_SOURCES) $(PROCEEDINGS_MD_INPUTS)
+	npm --prefix "$(PROCEEDINGS_MD_DIR)" run convert -- "$(abspath $<)" "$(abspath $@)"
 
 pdf: paper.pdf
 
@@ -97,14 +106,15 @@ clean:
 
 setup:
 	git submodule update --init
-	cd proceedings-md && npm install && npm run build
+	npm --prefix "$(PROCEEDINGS_MD_DIR)" install
+	npm --prefix "$(PROCEEDINGS_MD_DIR)" run build
 
 watch:
-	@echo "Watching paper.md and bibliography.bib for changes... (press Ctrl+C to stop)"
+	@echo "Watching paper and converter sources for changes... (press Ctrl+C to stop)"
 	@if command -v fswatch >/dev/null 2>&1; then \
-		while fswatch -1 paper.md bibliography.bib >/dev/null; do $(MAKE) build; done; \
+		while fswatch -1 $(WATCH_SOURCES) >/dev/null; do $(MAKE) build; done; \
 	elif command -v inotifywait >/dev/null 2>&1; then \
-		while inotifywait -q -e modify paper.md bibliography.bib; do $(MAKE) build; done; \
+		while inotifywait -q -e modify $(WATCH_SOURCES); do $(MAKE) build; done; \
 	else \
 		echo "Error: no file watcher found. Install with 'brew install fswatch' (macOS) or 'sudo apt install inotify-tools' (Debian/Ubuntu)." >&2; \
 		exit 1; \
@@ -169,7 +179,7 @@ validate: lint check-sentence-lines spell check-links grammar
 
 help:
 	@echo "Available targets:"
-	@echo "  make build        — Build paper.docx from paper.md"
+	@echo "  make build        — Build paper.docx and update stale converter JavaScript"
 	@echo "  make pdf          — Build paper.pdf from paper.docx (requires LibreOffice)"
 	@echo "  make optimize-pdf    — Optimize paper.pdf with Ghostscript + qpdf pipeline"
 	@echo "  make optimize-pdf-gs — Optimize paper.pdf with Ghostscript only"
@@ -177,7 +187,7 @@ help:
 	@echo "  make open         — Build and open paper.docx"
 	@echo "  make clean        — Remove generated files"
 	@echo "  make setup        — Initialize submodule and install dependencies"
-	@echo "  make watch        — Auto-rebuild on paper.md changes (requires fswatch or inotifywait)"
+	@echo "  make watch        — Auto-rebuild on paper or converter changes"
 	@echo "  make lint         — Run markdownlint on paper.md"
 	@echo "  make check-sentence-lines — Enforce one prose sentence per source line"
 	@echo "  make spell        — Run hunspell spell checker on paper.md"
