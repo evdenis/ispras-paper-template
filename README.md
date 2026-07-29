@@ -43,7 +43,6 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 
 | Software | Version | Install (macOS) | Install (Debian/Ubuntu) | Used by |
 |---|---|---|---|---|
-| File watcher | any | `brew install fswatch` | `sudo apt install inotify-tools` | `make watch` |
 | ghostscript | any | `brew install ghostscript` | `sudo apt install ghostscript` | `make optimize-pdf`, `make optimize-pdf-gs` |
 | qpdf | any | `brew install qpdf` | `sudo apt install qpdf` | `make optimize-pdf`, `make optimize-pdf-qpdf` |
 | pdftotext | any | `brew install poppler` | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
@@ -85,15 +84,15 @@ The final command should print only `ошипка`.
 
 | Target | Description |
 |---|---|
-| `make build` | Build `paper.docx` from `paper.md`, recompiling changed converter sources first |
-| `make pdf` | Build `paper.pdf` from `paper.docx` using LibreOffice |
-| `make open` | Build and open `paper.docx` using the platform document opener |
-| `make optimize-pdf` | Optimize `paper.pdf` with Ghostscript + qpdf pipeline (reduces file size) |
-| `make optimize-pdf-gs` | Optimize `paper.pdf` with Ghostscript only |
-| `make optimize-pdf-qpdf` | Optimize `paper.pdf` with qpdf only |
+| `make build` | Force a fresh `paper.docx` build from the current sources |
+| `make pdf` | Force fresh DOCX and PDF builds using LibreOffice |
+| `make open` | Force a fresh `paper.docx` build, then open it with the platform document opener |
+| `make optimize-pdf` | Rebuild `paper.pdf`, then optimize with Ghostscript + qpdf |
+| `make optimize-pdf-gs` | Rebuild `paper.pdf`, then optimize with Ghostscript |
+| `make optimize-pdf-qpdf` | Rebuild `paper.pdf`, then optimize with qpdf |
 | `make clean` | Remove generated files |
 | `make setup` | Initialize submodule and install npm dependencies |
-| `make watch` | Auto-rebuild on paper, bibliography, or converter changes (requires `fswatch` or `inotifywait`) |
+| `make watch` | Auto-rebuild on paper, bibliography, image, or converter changes |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make check-sentence-lines` | Enforce one prose sentence per source line in `paper.md` |
 | `make spell` | Run hunspell spell checker on `paper.md` |
@@ -108,6 +107,14 @@ The converter checkout defaults to `proceedings-md` and can be overridden with
 `PROCEEDINGS_MD_DIR=/path/to/proceedings-md`. Both `make build` and `make watch`
 track its TypeScript sources, build configuration, and DOCX reference template;
 conversion goes through the converter's guarded `npm run convert` command.
+The legacy `PROCEEDINGS_MD=/path/to/main.js` override remains supported for
+prebuilt external converters, but cannot automatically compile their sources.
+Public artifact targets (`make`, `make build`, `make pdf`, `make open`, and the
+PDF optimization targets) intentionally force their upstream conversions even
+when timestamps say the outputs are current. DOCX and PDF generation stage new
+files before replacing the existing artifacts, so a failed conversion preserves
+the last successful output and prevents downstream actions from using it as if
+it were current.
 
 Example:
 ```bash
@@ -117,7 +124,9 @@ make build   # build the paper
 
 ## Downloading the Latest Build
 
-This repository is configured with GitHub Actions to automatically build the paper when changes are made to `paper.md` or `bibliography.bib`. To download the latest build:
+This repository is configured with GitHub Actions to automatically build the
+paper when its Markdown, bibliography, images, build configuration, or converter
+revision changes. To download the latest build:
 
 1. Go to the repository's GitHub page
 2. Click on the "Actions" tab

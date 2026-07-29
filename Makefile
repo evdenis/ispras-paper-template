@@ -1,5 +1,9 @@
 # Path to the https://github.com/ispras/proceedings-md checkout
 PROCEEDINGS_MD_DIR ?= proceedings-md
+ifneq ($(strip $(PROCEEDINGS_MD)),)
+PROCEEDINGS_MD_INPUTS := $(PROCEEDINGS_MD)
+PROCEEDINGS_MD_CONVERT = node "$(PROCEEDINGS_MD)"
+else
 PROCEEDINGS_MD_SOURCES := $(wildcard $(PROCEEDINGS_MD_DIR)/src/*.ts)
 PROCEEDINGS_MD_BUILD_FILES := \
 	$(PROCEEDINGS_MD_DIR)/package.json \
@@ -7,8 +11,10 @@ PROCEEDINGS_MD_BUILD_FILES := \
 	$(PROCEEDINGS_MD_DIR)/scripts/build.mjs \
 	$(PROCEEDINGS_MD_DIR)/resources/isp-reference.docx
 PROCEEDINGS_MD_INPUTS := $(PROCEEDINGS_MD_SOURCES) $(PROCEEDINGS_MD_BUILD_FILES)
-PAPER_SOURCES := paper.md $(wildcard bibliography.bib)
-WATCH_SOURCES := $(PAPER_SOURCES) $(PROCEEDINGS_MD_INPUTS)
+PROCEEDINGS_MD_CONVERT = npm --prefix "$(PROCEEDINGS_MD_DIR)" run convert --
+endif
+PAPER_ASSETS := $(shell find images -type f 2>/dev/null)
+PAPER_SOURCES := paper.md $(wildcard bibliography.bib) $(PAPER_ASSETS)
 
 # Path to LanguageTool command-line JAR
 LANGUAGETOOL_JAR ?= languagetool-commandline.jar
@@ -33,13 +39,21 @@ GS_PDFSETTINGS ?= /printer
 # qpdf compression level (1-9)
 QPDF_COMPRESS_LEVEL ?= 9
 
+# Artifact recipes use fixed staging names, so serialize multi-goal invocations.
+.NOTPARALLEL:
 
 default: build
 
 build: paper.docx
 
-paper.docx: $(PAPER_SOURCES) $(PROCEEDINGS_MD_INPUTS)
-	npm --prefix "$(PROCEEDINGS_MD_DIR)" run convert -- "$(abspath $<)" "$(abspath $@)"
+paper.docx: $(PAPER_SOURCES) $(PROCEEDINGS_MD_INPUTS) FORCE
+	rm -f "$@.tmp" "$@.tmp.tmp"
+	@if ! $(PROCEEDINGS_MD_CONVERT) "$(abspath $<)" "$(abspath $@).tmp"; then \
+		rm -f "$@.tmp" "$@.tmp.tmp"; \
+		exit 1; \
+	fi
+	@test -f "$@.tmp" || { rm -f "$@.tmp.tmp"; echo "Error: converter did not create $@.tmp." >&2; exit 1; }
+	mv "$@.tmp" "$@"
 
 pdf: paper.pdf
 
@@ -48,17 +62,37 @@ paper.pdf: paper.docx
 		echo "Error: LibreOffice not found. Install with 'brew install --cask libreoffice' (macOS) or 'sudo apt install libreoffice' (Debian/Ubuntu)." >&2; \
 		exit 1; \
 	fi
-	"$(LIBREOFFICE)" --headless --convert-to pdf --outdir . "$<"
-	@test -f "$@" || { echo "Error: LibreOffice did not create $@." >&2; exit 1; }
+	rm -f "$@.tmp.docx" "$@.tmp.pdf"
+	cp "$<" "$@.tmp.docx"
+	@if ! "$(LIBREOFFICE)" --headless --convert-to pdf --outdir . "$@.tmp.docx"; then \
+		rm -f "$@.tmp.docx" "$@.tmp.pdf"; \
+		exit 1; \
+	fi
+	@test -f "$@.tmp.pdf" || { rm -f "$@.tmp.docx"; echo "Error: LibreOffice did not create $@.tmp.pdf." >&2; exit 1; }
+	mv "$@.tmp.pdf" "$@"
+	rm -f "$@.tmp.docx"
 
 optimize-pdf-gs: paper.pdf
+	$(MAKE) --no-print-directory optimize-pdf-gs-current
+
+optimize-pdf-gs-current:
 	@if ! command -v gs >/dev/null 2>&1; then \
 		echo "Warning: Ghostscript (gs) not installed, skipping. Install with 'brew install ghostscript' (macOS) or 'sudo apt install ghostscript' (Debian/Ubuntu)."; \
 	else \
 		orig_size=$$(wc -c < paper.pdf | tr -d '[:space:]'); \
-		gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=$(GS_PDFSETTINGS) \
+		rm -f paper.pdf.tmp; \
+		if ! gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=$(GS_PDFSETTINGS) \
 			-dCompressFonts=true -dSubsetFonts=true -dDetectDuplicateImages=true \
-			-dNOPAUSE -dQUIET -dBATCH -sOutputFile=paper.pdf.tmp paper.pdf; \
+			-dNOPAUSE -dQUIET -dBATCH -sOutputFile=paper.pdf.tmp paper.pdf; then \
+			rm -f paper.pdf.tmp; \
+			echo "Error: Ghostscript failed to optimize paper.pdf." >&2; \
+			exit 1; \
+		fi; \
+		if [ ! -s paper.pdf.tmp ]; then \
+			rm -f paper.pdf.tmp; \
+			echo "Error: Ghostscript did not create paper.pdf.tmp." >&2; \
+			exit 1; \
+		fi; \
 		opt_size=$$(wc -c < paper.pdf.tmp | tr -d '[:space:]'); \
 		if [ "$$opt_size" -lt "$$orig_size" ]; then \
 			mv paper.pdf.tmp paper.pdf; \
@@ -70,13 +104,26 @@ optimize-pdf-gs: paper.pdf
 	fi
 
 optimize-pdf-qpdf: paper.pdf
+	$(MAKE) --no-print-directory optimize-pdf-qpdf-current
+
+optimize-pdf-qpdf-current:
 	@if ! command -v qpdf >/dev/null 2>&1; then \
 		echo "Warning: qpdf not installed, skipping. Install with 'brew install qpdf' (macOS) or 'sudo apt install qpdf' (Debian/Ubuntu)."; \
 	else \
 		orig_size=$$(wc -c < paper.pdf | tr -d '[:space:]'); \
-		qpdf --compress-streams=y --object-streams=generate \
+		rm -f paper.pdf.tmp; \
+		if ! qpdf --compress-streams=y --object-streams=generate \
 			--recompress-flate --compression-level=$(QPDF_COMPRESS_LEVEL) \
-			paper.pdf paper.pdf.tmp; \
+			paper.pdf paper.pdf.tmp; then \
+			rm -f paper.pdf.tmp; \
+			echo "Error: qpdf failed to optimize paper.pdf." >&2; \
+			exit 1; \
+		fi; \
+		if [ ! -s paper.pdf.tmp ]; then \
+			rm -f paper.pdf.tmp; \
+			echo "Error: qpdf did not create paper.pdf.tmp." >&2; \
+			exit 1; \
+		fi; \
 		opt_size=$$(wc -c < paper.pdf.tmp | tr -d '[:space:]'); \
 		if [ "$$opt_size" -lt "$$orig_size" ]; then \
 			mv paper.pdf.tmp paper.pdf; \
@@ -88,9 +135,10 @@ optimize-pdf-qpdf: paper.pdf
 	fi
 
 optimize-pdf: paper.pdf
-	@orig_size=$$(wc -c < paper.pdf | tr -d '[:space:]'); \
-	$(MAKE) --no-print-directory optimize-pdf-gs; \
-	$(MAKE) --no-print-directory optimize-pdf-qpdf; \
+	@set -e; \
+	orig_size=$$(wc -c < paper.pdf | tr -d '[:space:]'); \
+	$(MAKE) --no-print-directory optimize-pdf-gs-current; \
+	$(MAKE) --no-print-directory optimize-pdf-qpdf-current; \
 	final_size=$$(wc -c < paper.pdf | tr -d '[:space:]'); \
 	echo "Total: $$orig_size -> $$final_size bytes (saved $$(( orig_size - final_size )) bytes)"
 
@@ -102,7 +150,8 @@ open: paper.docx
 	"$(OPENER)" "$<"
 
 clean:
-	rm -f paper.docx paper.docx.tmp paper.pdf paper.pdf.tmp
+	rm -f paper.docx paper.docx.tmp paper.docx.tmp.tmp \
+		paper.pdf paper.pdf.tmp paper.pdf.tmp.docx paper.pdf.tmp.pdf
 
 setup:
 	git submodule update --init
@@ -111,14 +160,7 @@ setup:
 
 watch:
 	@echo "Watching paper and converter sources for changes... (press Ctrl+C to stop)"
-	@if command -v fswatch >/dev/null 2>&1; then \
-		while fswatch -1 $(WATCH_SOURCES) >/dev/null; do $(MAKE) build; done; \
-	elif command -v inotifywait >/dev/null 2>&1; then \
-		while inotifywait -q -e modify $(WATCH_SOURCES); do $(MAKE) build; done; \
-	else \
-		echo "Error: no file watcher found. Install with 'brew install fswatch' (macOS) or 'sudo apt install inotify-tools' (Debian/Ubuntu)." >&2; \
-		exit 1; \
-	fi
+	node scripts/watch.mjs "$(MAKE)" "$(PROCEEDINGS_MD_DIR)" "$(PROCEEDINGS_MD)"
 
 lint:
 	npx markdownlint-cli2 paper.md
@@ -177,17 +219,19 @@ count:
 
 validate: lint check-sentence-lines spell check-links grammar
 
+FORCE:
+
 help:
 	@echo "Available targets:"
-	@echo "  make build        — Build paper.docx and update stale converter JavaScript"
-	@echo "  make pdf          — Build paper.pdf from paper.docx (requires LibreOffice)"
-	@echo "  make optimize-pdf    — Optimize paper.pdf with Ghostscript + qpdf pipeline"
-	@echo "  make optimize-pdf-gs — Optimize paper.pdf with Ghostscript only"
-	@echo "  make optimize-pdf-qpdf — Optimize paper.pdf with qpdf only"
-	@echo "  make open         — Build and open paper.docx"
+	@echo "  make build        — Force a fresh paper.docx build"
+	@echo "  make pdf          — Force fresh DOCX and PDF builds (requires LibreOffice)"
+	@echo "  make optimize-pdf    — Rebuild PDF, then optimize with Ghostscript + qpdf"
+	@echo "  make optimize-pdf-gs — Rebuild PDF, then optimize with Ghostscript only"
+	@echo "  make optimize-pdf-qpdf — Rebuild PDF, then optimize with qpdf only"
+	@echo "  make open         — Force a fresh build, then open paper.docx"
 	@echo "  make clean        — Remove generated files"
 	@echo "  make setup        — Initialize submodule and install dependencies"
-	@echo "  make watch        — Auto-rebuild on paper or converter changes"
+	@echo "  make watch        — Auto-rebuild on paper, image, or converter changes"
 	@echo "  make lint         — Run markdownlint on paper.md"
 	@echo "  make check-sentence-lines — Enforce one prose sentence per source line"
 	@echo "  make spell        — Run hunspell spell checker on paper.md"
@@ -197,4 +241,6 @@ help:
 	@echo "  make validate     — Run all source checks listed above"
 	@echo "  make help         — Show this help message"
 
-.PHONY: default build pdf optimize-pdf optimize-pdf-gs optimize-pdf-qpdf open clean setup watch lint check-sentence-lines spell grammar check-links count validate help
+.PHONY: FORCE default build pdf optimize-pdf optimize-pdf-gs optimize-pdf-qpdf \
+	optimize-pdf-gs-current optimize-pdf-qpdf-current open clean setup watch \
+	lint check-sentence-lines spell grammar check-links count validate help
