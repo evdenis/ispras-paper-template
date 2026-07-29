@@ -65,7 +65,7 @@ export function sentenceSegments(text) {
 }
 
 function contentParts(line) {
-  const list = line.match(/^(\s*(?:[-+*]|\d+\.)\s+)(.*)$/u);
+  const list = line.match(/^(\s*(?:[-+*]|\d+[.)])\s+)(.*)$/u);
   if (list) {
     return {
       content: list[2],
@@ -90,6 +90,7 @@ function lineClassifier(lines) {
   let foldedIndent = null;
   let fence = null;
   let inMath = false;
+  let inCaption = false;
 
   return lines.map((line) => {
     if (line === '---' && inFrontmatter) {
@@ -139,27 +140,43 @@ function lineClassifier(lines) {
     }
 
     if (inMath) {
-      if (/^\s*\$\$\s*$/u.test(line)) {
+      if (/\$\$\s*$/u.test(line)) {
         inMath = false;
       }
       return { eligible: false, reset: true };
     }
 
-    if (/^\s*\$\$\s*$/u.test(line)) {
-      inMath = true;
+    // A display formula either opens and closes on one line, or opens here and
+    // runs until a line ending with `$$`. The opening delimiter may be followed
+    // by content, as in `$$\begin{array}{r}`.
+    if (/^\s*\$\$/u.test(line)) {
+      if (!/^\s*\$\$.*\$\$\s*$/u.test(line)) {
+        inMath = true;
+      }
       return { eligible: false, reset: true };
     }
 
-    if (/^\s*\$\$.*\$\$\s*$/u.test(line)) {
+    // A caption must stay on a single source line: the converter drops the
+    // softbreak, so a wrapped caption renders with no space at the join.
+    const divMarker = line.trimStart().match(/^:::+\s*(.*)$/u);
+    if (divMarker !== null) {
+      if (inCaption) {
+        inCaption = false;
+      } else if (/(?:img|table|listing)-caption/u.test(divMarker[1])) {
+        inCaption = true;
+      }
+      return { eligible: false, reset: true };
+    }
+
+    if (inCaption) {
       return { eligible: false, reset: true };
     }
 
     const structural = line.trim() === ''
       || /^\s*#/u.test(line)
       || /^\s*\|/u.test(line)
-      || /^\s*:::/u.test(line)
       || /^\s*===.*===\s*$/u.test(line)
-      || /^\s*!\[[^\]]*\]\([^)]+\)\s*$/u.test(line)
+      || /^\s*!\[[^\]]*\]\([^)]+\)(?:\{[^}]*\})?\s*$/u.test(line)
       || /^\s*<!--\s*$/u.test(line)
       || /^\s*-->\s*$/u.test(line);
 

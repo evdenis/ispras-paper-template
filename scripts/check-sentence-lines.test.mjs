@@ -87,6 +87,38 @@ test('ignores Markdown structures that cannot be reflowed', () => {
   assert.deepEqual(checkMarkdown(text), []);
 });
 
+test('ignores converter constructs from the paper template', () => {
+  const text = [
+    '![](images/example.png){width="14cm"}',
+    '$$\\begin{array}{r}',
+    'U_{1} = n_{1}n_{1} - R_{1};\\#(1)',
+    '\\end{array}$$',
+    '1) пример;',
+    '2) нумерованного;',
+    '3) списка.',
+  ].join('\n');
+  assert.deepEqual(checkMarkdown(text), []);
+});
+
+test('exempts caption divs, which must stay on one line', () => {
+  const text = [
+    '::: img-caption',
+    'Рис. 1. Описание изображения.',
+    ':::',
+    '',
+    '::: table-caption',
+    'Table 1. Table description.',
+    ':::',
+  ].join('\n');
+  assert.deepEqual(checkMarkdown(text), []);
+
+  // A non-caption div is still ordinary prose.
+  const other = ['::: note', 'Первое. Второе.', ':::'].join('\n');
+  assert.deepEqual(checkMarkdown(other), [
+    { line: 2, message: 'contains 2 sentences' },
+  ]);
+});
+
 test('formats paragraphs and keeps list continuation indentation', () => {
   const input = 'Первое. Второе.\n\n- Один пункт. Еще предложение.\n';
   const expected = 'Первое.\nВторое.\n\n- Один пункт.\n  Еще предложение.\n';

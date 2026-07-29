@@ -78,56 +78,71 @@ ispras_templates:
 
   acknowledgements_ru: 'Работа поддержана компанией Лаборатории Касперского в рамках проекта «Анализ мирового уровня техники по архитектурным средствам обеспечения доверия».'
   acknowledgements_en: 'The work was supported by Kaspersky Lab as part of the project "Analysis of world-class technology in architectural means of ensuring trust".'
+
+  # Optional. Auto-generated from the authors and the title if omitted.
+
+  # for_citation_ru: 'Ефремов Д.В., Петренко А.К. Обзор механизмов усиления защищенности операционных систем и пользовательских приложений. Труды ИСП РАН, том 37, вып. 1, 2025 г., стр. 1-10.'
+  # for_citation_en: 'Efremov D.V., Petrenko A.K. Overview of Hardening Mechanisms in Operating Systems and User Applications. Trudy ISP RAN/Proc. ISP RAS, vol. 37, issue 1, 2025, pp. 1-10.'
+
+  # page_header_ru: 'Ефремов Д.В., Петренко А.К. Обзор механизмов усиления защищенности операционных систем и пользовательских приложений.'
+  # page_header_en: 'Efremov D.V., Petrenko A.K. Overview of Hardening Mechanisms in Operating Systems and User Applications.'
 ---
 
 ## 1. Введение
 
 <!--
 === TEMPLATE EXAMPLES ===
-Below are examples of supported features.
+Below are examples of every construct the proceedings-md converter supports.
 Uncomment and adapt as needed.
+See proceedings-md/sample/sample.md and proceedings-md/sample/test-features.md for the upstream originals.
+Do not nest HTML comments inside this block: they would terminate it early.
 
---- Image with bilingual caption (fenced div + @ref) ---
+--- Heading levels ---
 
-![](images/example.png)
+## 2. Заголовок первого уровня
+
+### 2.1 Заголовок второго уровня
+
+#### 2.1.1 Заголовок третьего уровня
+
+--- Image with bilingual caption (image first, captions after) ---
+
+The width attribute keeps the figure within the ISPRAS limit of 14 cm.
+Pandoc also accepts inches, as in the upstream sample.
+
+![](images/example.png){width="14cm"}
 
 ::: img-caption
-Рис. @ref:fig:example.
-Описание изображения.
+Рис. @ref:fig:example. Описание изображения.
 :::
 
 ::: img-caption
-Fig. @ref:fig:example.
-Image description.
+Fig. @ref:fig:example. Image description.
 :::
 
---- Table with bilingual caption (fenced div + @ref) ---
+Cross-references also work in running prose.
+Ссылки на рисунок в тексте статьи должны иметь вид "рис. @ref:fig:example".
+Numbering is automatic and follows document order.
+
+--- Table with bilingual caption (captions first, table after) ---
+
+Keep each caption on a single source line.
+The converter drops the line break, so a wrapped caption renders with no space at the join.
+Caption text is emitted as plain text: bold and italic markers appear literally, and inline code and math are dropped.
 
 ::: table-caption
-Табл. @ref:tab:example.
-Описание таблицы.
+Табл. @ref:tab:example. Описание таблицы.
 :::
 
 ::: table-caption
-Table @ref:tab:example.
-Table description.
+Table @ref:tab:example. Table description.
 :::
 
 | Column 1 | Column 2 | Column 3 |
 |----------|----------|----------|
 | Data 1   | Data 2   | Data 3   |
 
---- Code listing with bilingual caption (fenced div + @ref) ---
-
-::: listing-caption
-Листинг @ref:lst:example.
-Описание листинга.
-:::
-
-::: listing-caption
-Listing @ref:lst:example.
-Listing description.
-:::
+--- Code listing with bilingual caption (code first, captions after) ---
 
 ```c
 int main(void) {
@@ -135,28 +150,52 @@ int main(void) {
 }
 ```
 
---- Math formula ---
+::: listing-caption
+Листинг @ref:lst:example. Описание листинга.
+:::
+
+::: listing-caption
+Listing @ref:lst:example. Listing description.
+:::
+
+--- Math formulas ---
+
+Inline math is written as $n_{1}$.
+A numbered display formula is right-aligned and carries its number after a backslash-hash.
+
+$$\begin{array}{r}
+U_{1} = n_{1}n_{1} + \frac{n_{1}\left( n_{1} + 1 \right)}{2} - R_{1};\#(1)
+\end{array}$$
+
+An unnumbered display formula needs no array wrapper.
 
 $$E = mc^2$$
 
---- Lists with ListMode switching ---
+--- Lists ---
 
-<!-- ListMode -->
+Bulleted lists use identical markers throughout.
+
+- пример;
+- маркированного;
+- списка.
+
+Numbered lists use a closing parenthesis, per the ISPRAS style.
+
+1) пример;
+2) нумерованного;
+3) списка.
+
+Nested lists need no special markup.
 
 1. First ordered item
 2. Second ordered item
    - Nested bullet item
    - Another nested item
 
-<!-- ListMode -->
-
-- Bullet item one
-- Bullet item two
-
 --- In-text citation reference (biblatex-style) ---
 
 This is discussed in detail in [@OpenBSD].
-See also [@KSPP, @Freund2015].
+See also [@KSPP], [@Freund2015].
 
 === END TEMPLATE EXAMPLES ===
 -->

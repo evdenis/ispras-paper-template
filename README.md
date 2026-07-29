@@ -180,13 +180,24 @@ The converter supports the following Markdown extensions:
 - **Images with captions** — fenced div `::: img-caption` for bilingual captions
 - **Tables with captions** — fenced div `::: table-caption` for bilingual captions
 - **Code listings with captions** — fenced div `::: listing-caption` for bilingual captions
-- **Auto-numbered references** — `@ref:fig:label`, `@ref:tab:label`, `@ref:lst:label` for cross-references
+- **Image sizing** — `![](images/example.png){width="14cm"}`; ISPRAS limits figures to 14 cm
+- **Auto-numbered references** — `@ref:fig:label`, `@ref:tab:label`, `@ref:lst:label`, usable both inside captions and in running prose
 - **Bibliography** — BibTeX `.bib` file with `[@Key]` citations in text
-- **Math formulas** — LaTeX via `$$...$$` blocks
-- **Nested lists** — use `<!-- ListMode -->` comments to switch list rendering mode
+- **Math formulas** — inline `$...$` and display `$$...$$`; wrap a display formula in `\begin{array}{r} ... \#(1) \end{array}` to get a right-aligned equation number
+- **Lists** — bulleted, nested, and both ordered styles (`1.` and `1)`) work as plain Markdown, with no extra markup
 - **Bilingual content** — full Russian/English support for all metadata fields
 
-For a complete example, see `proceedings-md/sample/sample.md`.
+Caption placement matters: **figure** and **listing** captions go *after* the image or
+code block, while **table** captions go *before* the table.
+
+Captions have two limitations worth knowing. Keep each caption on a **single source
+line** — the converter drops the line break, so a wrapped caption renders with no space
+at the join. And caption text is emitted as plain text: `**bold**` / `_italic_` markers
+appear literally, and inline code and `$math$` are dropped.
+
+For complete examples, see `proceedings-md/sample/sample.md` and
+`proceedings-md/sample/test-features.md` (listings, formulas, lists), or the commented
+example block in `paper.md`.
 
 ## Troubleshooting
 
