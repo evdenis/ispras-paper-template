@@ -1,5 +1,7 @@
 # Path to the https://github.com/ispras/proceedings-md checkout
 PROCEEDINGS_MD_DIR ?= proceedings-md
+PYTHON ?= python3
+UV ?= uv
 ifneq ($(strip $(PROCEEDINGS_MD)),)
 PROCEEDINGS_MD_INPUTS := $(PROCEEDINGS_MD)
 PROCEEDINGS_MD_CONVERT = node "$(PROCEEDINGS_MD)"
@@ -169,6 +171,14 @@ check-sentence-lines:
 	node --test scripts/check-sentence-lines.test.mjs
 	node scripts/check-sentence-lines.mjs paper.md
 
+test-layout:
+	$(PYTHON) -m unittest scripts/test_check_layout.py
+
+# Page-breaking defects only exist once the PDF is paginated, so this target
+# rebuilds it and needs LibreOffice; it stays out of 'validate' for that reason.
+check-layout: paper.pdf
+	$(UV) run --quiet --with pdfplumber $(PYTHON) scripts/check_layout.py paper.pdf $(CHECK_LAYOUT_FLAGS)
+
 spell:
 	@if ! command -v hunspell >/dev/null 2>&1; then \
 		echo "Error: hunspell not found. Install with 'brew install hunspell' (macOS) or 'sudo apt install hunspell hunspell-en-us hunspell-ru' (Debian/Ubuntu)." >&2; \
@@ -217,7 +227,7 @@ grammar:
 count:
 	@sed '1,/^---$$/d' paper.md | sed '/^<!--/,/-->$$/d' | wc -w
 
-validate: lint check-sentence-lines spell check-links grammar
+validate: lint check-sentence-lines test-layout spell check-links grammar
 
 FORCE:
 
@@ -234,6 +244,8 @@ help:
 	@echo "  make watch        — Auto-rebuild on paper, image, or converter changes"
 	@echo "  make lint         — Run markdownlint on paper.md"
 	@echo "  make check-sentence-lines — Enforce one prose sentence per source line"
+	@echo "  make test-layout  — Unit-test the layout report"
+	@echo "  make check-layout — Report page-breaking defects in paper.pdf"
 	@echo "  make spell        — Run hunspell spell checker on paper.md"
 	@echo "  make check-links  — Check links in paper.md"
 	@echo "  make grammar      — Run LanguageTool grammar checker on paper.md"
@@ -243,4 +255,5 @@ help:
 
 .PHONY: FORCE default build pdf optimize-pdf optimize-pdf-gs optimize-pdf-qpdf \
 	optimize-pdf-gs-current optimize-pdf-qpdf-current open clean setup watch \
-	lint check-sentence-lines spell grammar check-links count validate help
+	lint check-sentence-lines test-layout check-layout spell grammar \
+	check-links count validate help

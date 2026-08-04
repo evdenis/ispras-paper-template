@@ -11,6 +11,8 @@ on:
       - 'Makefile'
       - 'scripts/check-sentence-lines.mjs'
       - 'scripts/check-sentence-lines.test.mjs'
+      - 'scripts/check_layout.py'
+      - 'scripts/test_check_layout.py'
       - '.github/workflows/**'
   pull_request:
     branches: [ master ]
@@ -22,6 +24,8 @@ on:
       - 'Makefile'
       - 'scripts/check-sentence-lines.mjs'
       - 'scripts/check-sentence-lines.test.mjs'
+      - 'scripts/check_layout.py'
+      - 'scripts/test_check_layout.py'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -63,6 +67,9 @@ jobs:
     - name: Check sentence line breaks
       run: make check-sentence-lines
 
+    - name: Test the layout report
+      run: make test-layout
+
     - name: Install hunspell
       run: sudo apt-get install -y hunspell hunspell-en-us hunspell-ru
 
@@ -103,6 +110,12 @@ jobs:
 
     - name: Build and optimize paper
       run: make optimize-pdf
+
+    - name: Report layout defects
+      continue-on-error: true
+      run: |
+        python3 -m pip install --quiet --break-system-packages pdfplumber
+        python3 scripts/check_layout.py paper.pdf
 
     - name: Upload paper as artifact
       uses: actions/upload-artifact@v7

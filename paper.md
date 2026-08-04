@@ -4,8 +4,8 @@ ispras_templates:
   header_en: 'Overview of Hardening Mechanisms in Operating Systems and User Applications'
 
   authors:
-    - name_ru: 'Д.В. Ефремов'
-      name_en: 'D.V. Efremov'
+    - name_ru: 'Д.В. Ефремов'
+      name_en: 'D.V. Efremov'
       orcid: '0000-0002-9916-056X'
       email: '<efremov@ispras.ru>'
       organizations: [ispras]
@@ -18,8 +18,8 @@ ispras_templates:
         Research interests:
         formal verification, static and dynamic analysis.
 
-    - name_ru: 'А.К. Петренко'
-      name_en: 'A.K. Petrenko'
+    - name_ru: 'А.К. Петренко'
+      name_en: 'A.K. Petrenko'
       orcid: '0000-0001-7411-3831'
       email: '<petrenko@ispras.ru>'
       organizations: [ispras, msu, hse]
@@ -32,6 +32,10 @@ ispras_templates:
 
   bibliography: bibliography.bib
 
+  # The converter inserts the non-breaking spaces Russian typography asks for —
+  # initials, one-letter prepositions, numeric groups. Where no rule applies, as
+  # in "ул. А. Солженицына, д. 25", the address lines below carry a literal
+  # U+00A0 instead.
   organizations:
     - id: ispras
       name_ru:
@@ -42,7 +46,7 @@ ispras_templates:
         - '25, Alexander Solzhenitsyn st., Moscow, 109004, Russia.'
     - id: msu
       name_ru:
-        - 'Московский государственный университет имени М.В. Ломоносова,'
+        - 'Московский государственный университет имени М.В. Ломоносова,'
         - 'Россия, 119991, Москва, Ленинские горы, д. 1.'
       name_en:
         - 'Lomonosov Moscow State University,'
@@ -50,7 +54,7 @@ ispras_templates:
     - id: hse
       name_ru:
         - 'НИУ Высшая школа экономики,'
-        - 'Россия, 101978, г. Москва, ул. Мясницкая, д. 20.'
+        - 'Россия, 101978, г. Москва, ул. Мясницкая, д. 20.'
       name_en:
         - 'National Research University Higher School of Economics,'
         - '20, Myasnitskaya ulitsa, Moscow, 101978, Russia.'
@@ -126,9 +130,8 @@ Numbering is automatic and follows document order.
 
 --- Table with bilingual caption (captions first, table after) ---
 
-Keep each caption on a single source line.
-The converter drops the line break, so a wrapped caption renders with no space at the join.
-Caption text is emitted as plain text: bold and italic markers appear literally, and inline code and math are dropped.
+Captions are rendered by Pandoc, so they take the same inline markup as body text: bold, italic, inline code, math and links.
+A caption may span several source lines.
 
 ::: table-caption
 Табл. @ref:tab:example. Описание таблицы.
@@ -196,6 +199,22 @@ Nested lists need no special markup.
 
 This is discussed in detail in [@OpenBSD].
 See also [@KSPP], [@Freund2015].
+
+--- Typography ---
+
+Prose is written with ordinary spaces.
+The converter binds the pairs Russian typography does not let a line break on: a one-letter preposition to the next word, a reference word or an abbreviation to its number, a citation to the word before it, the parts of a numeric group, a number to its unit, initials to their surname, a dash to the word it follows, and the last short word of a paragraph to the one before it.
+Так, "в разделе 7" и "рис. 4" уезжают на следующую строку целиком, а "[12, 13]" не разрывается посередине.
+
+A backslash followed by a space still forces a non-breaking space where no rule applies, and it is never doubled.
+
+To keep the spaces of one fragment exactly as typed:
+
+[здесь пробелы остаются обычными]{.no-typography}
+
+To switch the whole document off, add to the frontmatter:
+
+  typography: false
 
 === END TEMPLATE EXAMPLES ===
 -->

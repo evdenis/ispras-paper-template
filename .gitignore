@@ -1,5 +1,4 @@
 # Build output
-# Build output
 *.docx
 *.txt
 *.tmp
@@ -22,59 +21,9 @@ Thumbs.db
 
 # Node
 node_modules/
-*.pdf
-*.html
-*.odt
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Node
-node_modules/
-
-# Output formats
-*.pdf
-*.html
-*.odt
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Node
-node_modules/
-*.pdf
-*.html
-*.odt
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Node
-node_modules/
+# Python
+__pycache__/
 
 # LanguageTool (downloaded locally for grammar checking)
 LanguageTool-*/

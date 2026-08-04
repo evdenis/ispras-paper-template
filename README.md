@@ -33,6 +33,7 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 
 | Software | Version | Install (macOS) | Install (Debian/Ubuntu) | Used by |
 |---|---|---|---|---|
+| Python | 3.11+ | Preinstalled, or `brew install python` | `sudo apt install python3` | `make test-layout` |
 | hunspell | any recent | `brew install hunspell` (then install dictionaries below) | `sudo apt install hunspell hunspell-en-us hunspell-ru` | `make spell` |
 | Java (JRE/JDK) | 17+ | Included by `brew install languagetool`, or `brew install openjdk@17` | `sudo apt install openjdk-17-jre` | `make grammar` with a standalone JAR |
 | [LanguageTool](https://languagetool.org/download/) | stable | `brew install languagetool` | Download and unzip [LanguageTool-stable.zip](https://languagetool.org/download/LanguageTool-stable.zip) | `make grammar` |
@@ -46,6 +47,7 @@ This project uses [ispras/proceedings-md](https://github.com/ispras/proceedings-
 | ghostscript | any | `brew install ghostscript` | `sudo apt install ghostscript` | `make optimize-pdf`, `make optimize-pdf-gs` |
 | qpdf | any | `brew install qpdf` | `sudo apt install qpdf` | `make optimize-pdf`, `make optimize-pdf-qpdf` |
 | pdftotext | any | `brew install poppler` | `sudo apt install poppler-utils` | Git diff for PDFs (see below) |
+| [uv](https://docs.astral.sh/uv/) | any | `brew install uv` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` | `make check-layout`, which runs `check_layout.py` with `pdfplumber` |
 
 On macOS, Homebrew installs the Hunspell executable without dictionaries. Install the required English and Russian dictionaries in the user dictionary directory:
 
@@ -95,6 +97,8 @@ The final command should print only `ошипка`.
 | `make watch` | Auto-rebuild on paper, bibliography, image, or converter changes |
 | `make lint` | Run markdownlint on `paper.md` |
 | `make check-sentence-lines` | Enforce one prose sentence per source line in `paper.md` |
+| `make test-layout` | Unit-test the layout report |
+| `make check-layout` | Rebuild `paper.pdf` and report page-breaking defects in it |
 | `make spell` | Run hunspell spell checker on `paper.md` |
 | `make grammar` | Run LanguageTool grammar checker on `paper.md` using its command or standalone JAR |
 | `make check-links` | Validate links in `paper.md` |
@@ -181,6 +185,7 @@ The `ispras_templates:` block in `paper.md` supports the following fields:
 | `for_citation_ru` / `for_citation_en` | No | Citation string (auto-generated from authors and title if omitted) |
 | `page_header_ru` / `page_header_en` | No | Running page header (auto-generated from authors and title if omitted) |
 | `acknowledgements_ru` / `acknowledgements_en` | No | Acknowledgements section |
+| `typography` | No | Set to `false` to stop the converter from inserting non-breaking spaces (see [Typography](#typography)) |
 
 Each **author** entry supports: `name_ru`, `name_en`, `orcid`, `email`, `organizations` (list of organization IDs), `details_ru`, `details_en`.
 
@@ -199,18 +204,73 @@ The converter supports the following Markdown extensions:
 - **Math formulas** — inline `$...$` and display `$$...$$`; wrap a display formula in `\begin{array}{r} ... \#(1) \end{array}` to get a right-aligned equation number
 - **Lists** — bulleted, nested, and both ordered styles (`1.` and `1)`) work as plain Markdown, with no extra markup
 - **Bilingual content** — full Russian/English support for all metadata fields
+- **Typography** — the non-breaking spaces Russian typography requires are inserted during conversion (see below)
 
 Caption placement matters: **figure** and **listing** captions go *after* the image or
 code block, while **table** captions go *before* the table.
 
-Captions have two limitations worth knowing. Keep each caption on a **single source
-line** — the converter drops the line break, so a wrapped caption renders with no space
-at the join. And caption text is emitted as plain text: `**bold**` / `_italic_` markers
-appear literally, and inline code and `$math$` are dropped.
+Captions are rendered by Pandoc, so they take the same inline markup as body text —
+`**bold**`, `_italic_`, `` `code` ``, `$math$`, links — and a caption may span several
+source lines.
 
 For complete examples, see `proceedings-md/sample/sample.md` and
 `proceedings-md/sample/test-features.md` (listings, formulas, lists), or the commented
 example block in `paper.md`.
+
+## Typography
+
+Word breaks a line at any space. Russian typography does not allow that after a
+one-letter preposition, between a reference word and its number, in front of a citation
+or a dash, inside a numeric group or a name, or before the last short word of a
+paragraph. The converter inserts the non-breaking spaces (U+00A0) itself, so `paper.md`
+is written as ordinary prose (`_` below stands for the inserted space):
+
+| Rule | Source | Result |
+|---|---|---|
+| citation | `подход [@kurmus2013]` | `подход_[12]` |
+| abbreviation with a number | `на рис. 4`, `см. § 5`, `Fig. 4` | `на_рис._4` |
+| reference word with a number | `в разделе 7`, `таблицы 3` | `в_разделе_7` |
+| numeric group | `11 131`, `57 %`, `11,1 млн`, `± 0,05` | `11_131` |
+| unit | `10 МБ`, `2007 г.` | `10_МБ` |
+| initials | `В. П. Иванников`, `Ермаков М. К.` | `В._П._Иванников` |
+| one-letter preposition | `в ядре`, `с учетом` | `в_ядре` |
+| dash | `охват --- качество` | `охват_— качество` |
+| hanging word | the last short word of a paragraph | `составляет_0,05.` |
+
+The rules run on the Pandoc AST rather than on the text: they never look inside code,
+formulas or link targets, and a paragraph ends where the paragraph really ends, not
+where the source line does — so a pair split by a line break in `paper.md` is bound like
+any other. Captions and table cells get every rule except the hanging-word one, because
+their wrapping is decided by the column.
+
+The text fields of the metadata — `abstract_*`, `keywords_*`, `header_*`, `details_*`,
+`acknowledgements_*`, `for_citation_*`, `page_header_*`, and the `name_*` of authors and
+organizations — are typeset by the same rules. An author name still becomes
+«Иванов И.И.» in the running head.
+
+A non-breaking space written by hand is kept and never doubled: in body text write a
+backslash followed by a space, which Pandoc reads as U+00A0; in the metadata type the
+character itself, as the address lines of `paper.md` do for «д. 25». To keep the spaces
+of one fragment exactly as typed, or to switch the pass off for the whole document:
+
+```markdown
+[текст с обычными пробелами]{.no-typography}
+```
+
+```yaml
+ispras_templates:
+  typography: false
+```
+
+Page-breaking defects exist only in the rendered PDF, so they have their own target:
+
+```bash
+make check-layout
+```
+
+It reports white-space holes, tables split without a repeated header, captions separated
+from their block, runt lines and forbidden line breaks. `make test-layout` unit-tests the
+report itself and is part of `make validate`.
 
 ## Troubleshooting
 
